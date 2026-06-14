@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>學院最後的聚會</title>
+    <style>
+        /* =========================================
+           基礎設定與手機版型限制
+           ========================================= */
+        body {
+            margin: 0; padding: 0; background-color: #222;
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "微軟正黑體", sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden;
+        }
+        #app-container {
+            width: 100%; max-width: 480px; height: 100%; background-color: #1a1a1a;
+            position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        /* =========================================
+           LINE 專屬防呆提示畫面
+           ========================================= */
+        #line-warning {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.95); z-index: 10000;
+            flex-direction: column; justify-content: flex-start; align-items: center;
+            color: #fff; padding: 30px 20px; box-sizing: border-box; text-align: center;
+        }
+        .line-arrow { 
+            font-size: 60px; color: #00ff00; align-self: flex-end; 
+            margin-right: 10px; margin-bottom: 20px; animation: bounce-diagonal 1s infinite; 
+        }
+        .line-text { font-size: 18px; line-height: 1.8; margin-bottom: 40px; letter-spacing: 1px; }
+        .highlight { color: #00ff00; font-weight: bold; font-size: 22px;}
+        .btn-close-line { 
+            background: transparent; color: #888; border: 1px solid #555; 
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px;
+        }
+        @keyframes bounce-diagonal { 
+            0%, 100% { transform: translate(0, 0); } 
+            50% { transform: translate(10px, -10px); } 
+        }
+
+        /* =========================================
+           遊戲序幕封面
+           ========================================= */
+        #start-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #0b0b0b; z-index: 1000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: #888; padding: 20px; box-sizing: border-box; text-align: center;
+            transition: opacity 1s ease-out;
+        }
+        .start-prompt { font-size: 14px; margin-bottom: 30px; line-height: 1.6; letter-spacing: 1px; }
+        .btn-enter-game {
+            background-color: #cc3333; border: none; padding: 15px 30px; font-size: 16px; 
+            font-weight: bold; border-radius: 30px; color: #fff; cursor: pointer;
+            box-shadow: 0 0 15px rgba(204, 51, 51, 0.5); transition: all 0.3s;
+            letter-spacing: 2px;
+        }
+        .btn-enter-game:active { background-color: #aa2222; transform: scale(0.95); }
+
+        /* =========================================
+           開發者維修站
+           ========================================= */
+        #debug-menu {
+            display: none;
+            position: fixed; bottom: 15px; right: 15px; z-index: 9999;
+            background: rgba(0, 0, 0, 0.85); padding: 8px; border-radius: 8px;
+            flex-direction: column; gap: 6px; border: 1px solid #555;
+            animation: fadeIn 0.3s forwards;
+        }
+        .debug-title { color: #ffaa00; font-size: 12px; text-align: center; font-weight: bold; margin-bottom: 4px; }
+        .debug-btn { background: #444; color: #fff; border: 1px solid #666; cursor: pointer; padding: 5px 10px; font-size: 12px; border-radius: 4px; transition: 0.2s; }
+        .debug-btn:hover { background: #ffaa00; color: #000; border-color: #ffaa00; }
+
+        /* =========================================
+           前導劇情
+           ========================================= */
+        #prologue {
+            display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+            height: 100%; padding: 40px 20px 80px 20px; box-sizing: border-box; color: #eee; background-color: #111;
+            overflow-y: auto; scroll-behavior: smooth;
+        }
+        #prologue-img {
+            width: 100%; max-width: 280px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-bottom: 25px; opacity: 0; animation: fadeIn 2s forwards; cursor: pointer;
+        }
+        #prologue-text { font-size: 16px; line-height: 1.8; letter-spacing: 1px; width: 100%; text-align: left; }
+        
+        #btn-wrapper {
+            width: 100%; display: flex; justify-content: center; margin-top: 30px; min-height: 60px;
+        }
+        .btn-prologue {
+            background-color: #fff; border: 2px solid #ccc; padding: 12px 24px; font-size: 16px; font-weight: bold;
+            border-radius: 8px; color: #333; cursor: pointer; transition: all 0.2s;
+            position: relative; z-index: 100;
+        }
+        .btn-prologue:active { background-color: #e0e0e0; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* =========================================
+           第一關：華容道 (滑塊拼圖)
+           ========================================= */
+        #stage1 { 
+            display: none; flex-direction: column; justify-content: flex-start; align-items: center; 
+            height: 100%; color: white; background-color: #1a1a1a; opacity: 0; animation: fadeIn 1s forwards; 
+            overflow-y: auto; padding: 40px 20px 80px 20px; box-sizing: border-box;
+        }
+        .puzzle-title { margin-bottom: 25px; text-align: center; color: #cc3333; letter-spacing: 2px; line-height: 1.5; font-size: 18px;}
+        
+        #puzzle-container { position: relative; width: 306px; height: 306px; background-color: #444; border: 3px solid #333; border-radius: 4px; box-sizing: border-box; transition: box-shadow 0.5s; flex-shrink: 0;}
+        
+        .puzzle-piece { 
+            position: absolute; width: 98px; height: 98px; 
+            background-image: url('https://drive.google.com/thumbnail?id=10CxFJOmLZKQJl-B6GWuXFYkgjrkhHUTE&sz=w1000');
+            background-size: 300px 300px; cursor: pointer; transition: transform 0.2s ease-in-out; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3); 
+        }
+        
+        #piece-8 { display: none; } 
+        .glow { box-shadow: 0 0 30px 10px rgba(0, 255, 0, 0.7) !important; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { 0% { box-shadow: 0 0 20px 5px rgba(0, 255, 0, 0.5); } 100% { box-shadow: 0 0 40px 15px rgba(0, 255, 0, 0.9); } }
+
+        .puzzle-hint {
+            margin-top: 30px; font-size: 15px; color: #bbb; line-height: 1.7; text-align: left; letter-spacing: 1px; width: 100%; max-width: 320px;
+        }
+        .quote-text { color: #fff; font-weight: bold; }
+        .action-hint { color: #888; font-size: 13px; margin-top: 15px; text-align: center; display: block;}
+
+        /* =========================================
+           第二關：LINE 介面
+           ========================================= */
+        #stage2 { display: none; flex-direction: column; height: 100%; background-color: #849ebf; opacity: 0; animation: fadeIn 1s forwards;}
+        .line-header { height: 55px; background-color: #353b48; color: white; display: flex; align-items: center; font-size: 17px; font-weight: bold; }
+        .header-icon { flex: 1; text-align: center; cursor: pointer; }
+        .header-center { flex: 4; display: flex; align-items: center; justify-content: center; }
+        .header-logo { width: 28px; height: 28px; border-radius: 50%; margin-right: 8px; object-fit: cover; }
+        .chat-area { flex-grow: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto;}
+        .date-divider { text-align: center; margin: 10px 0 20px 0; }
+        .date-divider span { background-color: rgba(0, 0, 0, 0.15); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .system-message { text-align: center; color: #444; font-size: 13px; margin-bottom: 25px; font-weight: bold;}
+        .message-row { display: flex; align-items: flex-start; margin-bottom: 20px;}
+        .avatar { width: 45px; height: 45px; background-color: #fff; border-radius: 50%; margin-right: 12px; background-image: url('https://drive.google.com/thumbnail?id=1YRbKcYCue0aomUg2KVytIm81C3ISPYWQ&sz=w1000'); background-size: cover; background-position: center 20%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .message-content { display: flex; align-items: flex-end; }
+        
+        .bubble { background-color: #fff; padding: 15px 12px; border-radius: 18px; font-size: 16px; color: #333; position: relative; line-height: 1.8; box-shadow: 0 1px 2px rgba(0,0,0,0.1); writing-mode: vertical-rl; letter-spacing: 2px; }
+        .bubble::before { content: ""; position: absolute; top: 15px; left: -8px; border-style: solid; border-width: 8px 10px 8px 0; border-color: transparent #fff transparent transparent; }
+        .message-time { font-size: 11px; color: #555; margin-left: 8px; margin-bottom: 2px;}
+
+        .rich-menu-container { background-color: #fff; display: flex; flex-direction: column; }
+        .rich-menu-bar { height: 35px; background-color: #f3f3f3; color: #555; display: flex; align-items: center; justify-content: center; font-size: 13px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
+        .action-buttons { display: flex; height: 160px; background-color: #fafafa; }
+        .action-btn { 
+            flex: 1; border: none; background-color: transparent; font-size: 20px; font-weight: bold; color: #333; 
+            cursor: pointer; transition: background-color 0.2s; border-right: 1px solid #eaeaea;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;
+        }
+        .action-btn:last-child { border-right: none; }
+        .action-btn:active { background-color: #e0e0e0; }
+        .btn-icon { font-size: 36px; }
+
+        /* =========================================
+           Cyberpunk 崩潰特效區
+           ========================================= */
+        #stage-glitch { display: none; height: 100%; background-color: black; color: white; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 10; overflow: hidden; }
+        
+        #glitch-screen { display: none; flex-direction: column; gap: 15px; z-index: 10; } 
+        
+        .glitch-text { font-size: 32px; font-weight: bold; position: relative; letter-spacing: 3px; text-align: center; padding: 0 20px; line-height: 1.2;}
+        .glitch-text::before, .glitch-text::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; }
+        .glitch-text::before { left: 3px; text-shadow: -2px 0 red; animation: glitch-anim-1 0.2s infinite linear alternate-reverse; }
+        .glitch-text::after { left: -3px; text-shadow: 2px 0 cyan; animation: glitch-anim-2 0.3s infinite linear alternate-reverse; }
+        
+        @keyframes glitch-anim-1 { 0% { clip-path: inset(20% 0 80% 0); } 20% { clip-path: inset(60% 0 10% 0); } 40% { clip-path: inset(40% 0 50% 0); } 60% { clip-path: inset(80% 0 5% 0); } 80% { clip-path: inset(10% 0 70% 0); } 100% { clip-path: inset(30% 0 40% 0); } }
+        @keyframes glitch-anim-2 { 0% { clip-path: inset(10% 0 60% 0); } 20% { clip-path: inset(30% 0 20% 0); } 40% { clip-path: inset(70% 0 10% 0); } 60% { clip-path: inset(20% 0 50% 0); } 80% { clip-path: inset(90% 0 5% 0); } 100% { clip-path: inset(40% 0 30% 0); } }
+        
+        #tv-line {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 100%; height: 100%; background-color: #fff; z-index: 20; display: none;
+        }
+        .anim-tv-line {
+            display: block !important;
+            animation: collapse-to-line 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        @keyframes collapse-to-line {
+            0% { height: 100%; width: 100%; opacity: 0; }
+            10% { height: 100%; width: 100%; opacity: 1; } 
+            40% { height: 3px; width: 100%; opacity: 1; box-shadow: 0 0 20px 5px #fff; } 
+            80% { height: 3px; width: 0%; opacity: 1; box-shadow: 0 0 10px #fff; } 
+            100% { height: 3px; width: 0%; opacity: 0; }
+        }
+
+        #tv-noise {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 15; display: none;
+            background-color: #222;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-size: 200% 200%;
+            filter: grayscale(100%) contrast(400%) brightness(1.2);
+            opacity: 0;
+        }
+        .anim-tv-noise {
+            display: block !important;
+            animation: noise-static 0.1s infinite linear, noise-fade 2s forwards;
+        }
+        @keyframes noise-static {
+            0% { background-position: 0% 0%; }
+            25% { background-position: 50% 10%; }
+            50% { background-position: 10% 80%; }
+            75% { background-position: 90% 30%; }
+            100% { background-position: 100% 100%; }
+        }
+        @keyframes noise-fade {
+            0% { opacity: 0; }
+            2% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        #final-screen { 
+            display: none; width: 100%; height: 100%; 
+            background-color: #1a1a1a;
+            background-image: url('https://drive.google.com/thumbnail?id=1-K4r2r7dJGJEE47PEtlIB6Qxa4mngh4o&sz=w1000'); 
+            background-size: cover;
+            background-position: center;
+            padding: 20px; box-sizing: border-box; z-index: 5;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        .cursor { display: none; }
+
+        /* =========================================
+           霓虹燈看板特效
+           ========================================= */
+        .neon-board {
+            position: relative;
+            border: 4px solid #fff;
+            border-radius: 15px;
+            padding: 30px; 
+            box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #e044ff, 0 0 40px #e044ff, inset 0 0 10px #e044ff, inset 0 0 20px #e044ff;
+            background-color: rgba(0, 0, 0, 0.7);
+            transform: scale(0.95);
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: flicker-purple-border 4s infinite alternate;
+        }
+
+        .neon-board-pointer-shape {
+            position: absolute;
+            top: 50%;
+            right: -2px; 
+            width: 26px;
+            height: 26px;
+            border-top: 4px solid #fff;
+            border-right: 4px solid #fff;
+            transform: translateY(-50%) rotate(45deg);
+            box-shadow: 2px -2px 5px #fff, 5px -5px 15px #e044ff;
+            animation: flicker-purple-border 4s infinite alternate;
+        }
+
+        .neon-text-main {
+            font-family: "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif;
+            font-size: 38px; 
+            font-weight: bold;
+            color: transparent;
+            -webkit-text-stroke: 1.5px #fff;
+            text-shadow: 0 0 4px #fff, 0 0 8px rgba(255,255,255,0.8), 0 0 15px rgba(0, 255, 255, 0.5); 
+            letter-spacing: 2px;
+            line-height: 1.2;
+            text-align: center;
+            animation: flicker-cyan 3s infinite alternate;
+            margin: 0;
+        }
+
+        @keyframes flicker-purple-border {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #e044ff, 0 0 40px #e044ff, inset 0 0 10px #e044ff, inset 0 0 20px #e044ff;
+                border-color: #fff;
+            }
+            20%, 24%, 55% {
+                box-shadow: 0 0 2px rgba(224, 68, 255, 0.3), inset 0 0 2px rgba(224, 68, 255, 0.3);
+                border-color: #555;
+            }
+        }
+        
+        @keyframes flicker-cyan {
+            0%, 9%, 11%, 49%, 51%, 100% {
+                text-shadow: 0 0 4px #fff, 0 0 8px rgba(255,255,255,0.8), 0 0 15px rgba(0, 255, 255, 0.5);
+                -webkit-text-stroke: 1.5px #fff;
+            }
+            10%, 50% {
+                text-shadow: none;
+                -webkit-text-stroke: 1.5px #444;
+            }
+        }
+
+        /* =========================================
+           第四關：跑碼過場 (Matrix 文字揭示)
+           ========================================= */
+        #stage-bridge {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 50;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 數位瀑布畫布（過場用） */
+        #bridge-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        /* 跑碼文字容器 */
+        #bridge-text-box {
+            position: relative;
+            z-index: 2;
+            font-family: 'Courier New', Courier, monospace;
+            color: #0F0;
+            font-size: 15px;
+            line-height: 1.9;
+            letter-spacing: 1.5px;
+            text-align: center;
+            padding: 30px 28px;
+            background: rgba(0, 15, 0, 0.82);
+            border: 1px solid #0F0;
+            border-radius: 8px;
+            box-shadow: 0 0 25px #0F0;
+            max-width: 88%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in;
+        }
+
+        #bridge-text-box.visible {
+            opacity: 1;
+        }
+
+        /* 每一行文字逐字打出 */
+        .bridge-line {
+            display: block;
+            min-height: 1.9em;
+            white-space: pre-wrap;
+        }
+
+        .bridge-line.hint {
+            color: #8f8;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        /* =========================================
+           第五關：矩陣密碼輸入 (第二段程式碼)
+           ========================================= */
+        #stage-matrix {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 60;
+            overflow: hidden;
+        }
+
+        /* 數位瀑布畫布（密碼關卡用） */
+        #matrix-canvas {
+            display: block;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        /* 密碼輸入 UI */
+        #matrix-ui {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            text-align: center;
+            background: rgba(0, 15, 0, 0.85);
+            padding: 30px 20px;
+            border: 1px solid #0F0;
+            box-shadow: 0 0 30px #0F0;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+            width: 92%;
+            max-width: 440px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #0F0;
+        }
+
+        #matrix-ui h1 {
+            font-size: 1.35rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px #0F0;
+            margin: 0 0 12px 0;
+            animation: matrix-glitch 3s infinite;
+            line-height: 1.4;
+        }
+
+        #matrix-ui p {
+            font-size: 0.9rem;
+            color: #8f8;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            line-height: 1.5;
+        }
+
+        .coord-container {
+            border: 1px solid #0F0;
+            padding: 16px 8px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            background: rgba(0, 30, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .coord-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .coord-box {
+            background: black;
+            color: #0F0;
+            border: 1px solid #0F0;
+            width: 30px;
+            height: 40px;
+            font-size: 1.3rem;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            border-radius: 4px;
+            transition: 0.2s;
+            outline: none;
+        }
+
+        .coord-box:focus {
+            box-shadow: 0 0 10px #0F0;
+            background: rgba(0, 60, 0, 0.6);
+            transform: scale(1.05);
+            border-width: 2px;
+        }
+
+        .coord-symbol {
+            color: #8f8;
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace;
+            margin: 0 1px;
+            text-shadow: 0 0 5px #0F0;
+            font-weight: bold;
+        }
+
+        #matrix-submit-btn {
+            background: transparent;
+            color: #0F0;
+            border: 1px solid #0F0;
+            padding: 13px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 4px;
+            transition: 0.3s;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        #matrix-submit-btn:hover,
+        #matrix-submit-btn:active {
+            background: #0F0;
+            color: black;
+            box-shadow: 0 0 20px #0F0;
+        }
+
+        @keyframes matrix-glitch {
+            0% { opacity: 1; transform: translate(0); }
+            2% { opacity: 0.8; transform: translate(-2px, 2px); }
+            4% { opacity: 1; transform: translate(2px, -2px); }
+            6% { opacity: 0.9; transform: translate(0); }
+            100% { opacity: 1; transform: translate(0); }
+        }
+
+        /* 成功登出畫面 */
+        #success-screen {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #050505;
+            z-index: 70;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video { width: 100%; height: 100%; outline: none; object-fit: contain; }
+
+        .welcome-text {
+            font-size: 1.1rem;
+            margin-top: 25px;
+            color: #fff;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px #0F0, 0 0 5px #0F0;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.7;
+            opacity: 0;
+            animation: fadeInText 2s ease-in-out forwards;
+            animation-delay: 3.5s;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        @keyframes fadeInText {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="line-warning">
+    <div class="line-arrow">↗</div>
+    <div class="line-text">
+        偵測到您正使用 LINE 內建瀏覽器。<br><br>
+        為確保<span class="highlight">完整遊戲體驗與音效</span>，<br>
+        請點擊右上角的「⋮」或「⠇」，<br>
+        選擇 <span class="highlight">以預設瀏覽器開啟</span><br>
+        (Safari / Chrome)。
+    </div>
+    <button id="btn-close-line" class="btn-close-line">我已了解，繼續瀏覽</button>
+</div>
+
+<audio id="bgm-player" src="https://www.dropbox.com/scl/fi/fjq44ok4pvc4rnqhzn585/Ximending_Exit.mp3?rlkey=gh8ddyh0ll5rm2pxkb5yj2p8b&st=0le8j114&dl=1" loop></audio>
+
+<div id="start-overlay">
+    <div class="start-prompt">
+        流水席大廚波波狸發來了最後的訊息……<br><br>
+        請開啟裝置聲音以獲得最佳沉浸體驗。
+    </div>
+    <button id="btn-start" class="btn-enter-game">點擊入席</button>
+</div>
+
+<div id="debug-menu">
+    <div class="debug-title">🛠️ 維修站</div>
+    <button class="debug-btn" onclick="skipTo('prologue')">0. 劇情</button>
+    <button class="debug-btn" onclick="skipTo('stage1')">1. 華容道</button>
+    <button class="debug-btn" onclick="skipTo('stage2')">2. LINE</button>
+    <button class="debug-btn" onclick="skipTo('stage-glitch')">3. 崩潰特效</button>
+    <button class="debug-btn" onclick="skipTo('stage-bridge')">4. 過場跑碼</button>
+    <button class="debug-btn" onclick="skipTo('stage-matrix')">5. 密碼輸入</button>
+</div>
+
+<div id="app-container">
+    
+    <div id="prologue">
+        <img id="prologue-img" src="https://drive.google.com/thumbnail?id=1YRbKcYCue0aomUg2KVytIm81C3ISPYWQ&sz=w1000" alt="大廚波波貍">
+        <div id="prologue-text"></div>
+        <div id="btn-wrapper">
+            <button id="start-puzzle-btn" class="btn-prologue" style="display: none;">查看未知圖形</button>
+        </div>
+    </div>
+
+    <div id="stage1">
+        <h3 class="puzzle-title">疑似染血的紙條底下，<br>有著一塊謎題板……</h3>
+        <div id="puzzle-container"></div>
+        <div class="puzzle-hint">
+            你想起了學院學習的種種，心中浮現了夥伴們常說的話：<br><br>
+            <span class="quote-text">「雖然生活是有限的，但只要方向明確，我們總能轉換思路，找到新的可能」……</span><br>
+            <span class="action-hint">試著點擊相鄰方塊進行滑動以還原圖形</span>
+        </div>
+    </div>
+
+    <div id="stage2">
+        <div class="line-header">
+            <span class="header-icon">＜</span>
+            <span class="header-center">
+                <img class="header-logo" src="https://drive.google.com/thumbnail?id=1GjDpKbc1ISiYKvk9peVNP4YlgIBnlTu6&sz=w1000" alt="貍想Logo">
+                貍想
+            </span>
+            <span class="header-icon">≡</span>
+        </div>
+        <div class="chat-area">
+            <div class="date-divider"><span>2026/06/07 (日)</span></div>
+            <div class="system-message">波波貍 已離開聊天室</div>
+            <div class="message-row">
+                <div class="avatar"></div>
+                <div class="message-content">
+                    <div class="bubble">因為相信，<br>所以看見嗎？</div>
+                    <div class="message-time">上午 10:46</div>
+                </div>
+            </div>
+        </div>
+        <div class="rich-menu-container">
+            <div class="rich-menu-bar">圖文選單 ︿</div>
+            <div class="action-buttons">
+                <button class="action-btn glitch-trigger-btn">
+                    <span class="btn-icon">⭕</span>是！
+                </button>
+                <button class="action-btn glitch-trigger-btn">
+                    <span class="btn-icon">❌</span>否！
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-glitch">
+        <div id="glitch-screen">
+            <div class="glitch-text" data-text="GAME OVER">GAME OVER</div>
+            <div class="glitch-text" data-text="&">&</div>
+            <div class="glitch-text" data-text="LOG OUT">LOG OUT</div>
+        </div>
+        <div id="tv-line"></div>
+        <div id="tv-noise"></div>
+        <div id="final-screen">
+            <div id="neon-board" class="neon-board">
+                <div class="neon-text-main">NEW GAME</div>
+                <div class="neon-text-main">REALITY</div>
+                <div class="neon-board-pointer-shape"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 過場：跑碼揭示文字 -->
+    <div id="stage-bridge">
+        <canvas id="bridge-canvas"></canvas>
+        <div id="bridge-text-box">
+            <span class="bridge-line" id="bline-1"></span>
+            <span class="bridge-line" id="bline-2"></span>
+            <span class="bridge-line hint" id="bline-hint"></span>
+        </div>
+    </div>
+
+    <!-- 第五關：矩陣密碼輸入 -->
+    <div id="stage-matrix">
+        <canvas id="matrix-canvas"></canvas>
+        <div id="matrix-ui">
+            <h1>系統警告：<br>黃磚路正在瓦解</h1>
+            <p>Please enter the final coordinate to LOG OUT.</p>
+            <div class="coord-container">
+                <div class="coord-row">
+                    <input type="text" class="coord-box" maxlength="1" data-index="0" inputmode="numeric">
+                    <input type="text" class="coord-box" maxlength="1" data-index="1" inputmode="numeric">
+                    <span class="coord-symbol">.</span>
+                    <input type="text" class="coord-box" maxlength="1" data-index="2" inputmode="numeric">
+                    <input type="text" class="coord-box" maxlength="1" data-index="3" inputmode="numeric">
+                    <input type="text" class="coord-box" maxlength="1" data-index="4" inputmode="numeric">
+                    <input type="text" class="coord-box" maxlength="1" data-index="5" inputmode="numeric">
+                    <span class="coord-symbol">° N,</span>
+                </div>
+                <div class="coord-row">
+                    <input type="text" class="coord-box" maxlength="1" data-index="6" inputmode="numeric">
+                    <input type="text" class="coord-box" maxlength="1" data-index="7" inputmode="numeric">
+                    <input type="text" class="coord-box" maxlength="1" data-index="8" inputmode="numeric">
+                    <span class="coord-symbol">.</span>
+                    <input type="text" class="coord-box" maxlength="1" data-index="9" inputmode="numeric">
+                    <input type="text" class="coord-box" maxlength="1" data-index="10" inputmode="numeric">
+                    <input type="text" class="coord-box" maxlength="1" data-index="11" inputmode="numeric">
+                    <input type="text" class="coord-box" maxlength="1" data-index="12" inputmode="numeric">
+                    <span class="coord-symbol">° E</span>
+                </div>
+            </div>
+            <button id="matrix-submit-btn">[ 確 認 傳 送 ]</button>
+        </div>
+        <!-- 成功登出畫面 -->
+        <div id="success-screen">
+            <div class="video-container">
+                <video id="finalVideo" playsinline preload="auto">
+                    <source src="https://www.dropbox.com/scl/fi/t2yvqfq718qll65n27h65/Beaver10logout-to-Ximen.mp4?rlkey=rtsqpx7nr925as3w2gdzm0tda&st=nb9qs8l6&raw=1" type="video/mp4">
+                </video>
+            </div>
+            <div class="welcome-text">
+                世界就是一場盛大的遊戲－－<br>請前往西門町，尋找起始NPC，開啟新的任務線。
+            </div>
+        </div>
+    </div>
+
+</div><!-- end #app-container -->
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    // =========================================
+    // LINE 瀏覽器偵測
+    // =========================================
+    const lineWarning = document.getElementById('line-warning');
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    if (ua.indexOf("Line") > -1) lineWarning.style.display = "flex";
+    document.getElementById('btn-close-line').addEventListener('click', () => {
+        lineWarning.style.display = "none";
+    });
+
+    const bgm = document.getElementById('bgm-player');
+    const startOverlay = document.getElementById('start-overlay');
+    const btnStart = document.getElementById('btn-start');
+
+    // =========================================
+    // 音效合成系統
+    // =========================================
+    let audioCtx;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    function playBeep(duration) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 800;
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        gain.gain.value = 0.5;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
+    }
+    function playStatic(duration) {
+        if (!audioCtx) return;
+        const bufferSize = audioCtx.sampleRate * duration;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const gain = audioCtx.createGain();
+        gain.gain.value = 0.3;
+        noise.connect(gain); gain.connect(audioCtx.destination);
+        noise.start(); noise.stop(audioCtx.currentTime + duration);
+    }
+
+    // =========================================
+    // 0. 序幕入場
+    // =========================================
+    btnStart.addEventListener('click', () => {
+        initAudio();
+        bgm.play().catch(e => console.log("播放被攔截:", e));
+        startOverlay.style.opacity = '0';
+        setTimeout(() => {
+            startOverlay.style.display = 'none';
+            setTimeout(typeWriter, 500);
+        }, 1000);
+    });
+
+    // =========================================
+    // 開發者跳關
+    // =========================================
+    let secretClickCount = 0;
+    const debugMenu = document.getElementById('debug-menu');
+    document.getElementById('prologue-img').addEventListener('click', () => {
+        secretClickCount++;
+        if (secretClickCount === 5) {
+            debugMenu.style.display = 'flex';
+            secretClickCount = 0;
+        }
+    });
+
+    function hideAllStages() {
+        ['prologue','stage1','stage2','stage-glitch','stage-bridge','stage-matrix'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.style.display = 'none'; el.style.opacity = '1'; }
+        });
+        startOverlay.style.display = 'none';
+    }
+
+    window.skipTo = function(targetId) {
+        hideAllStages();
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        target.style.display = 'flex';
+        target.style.opacity = '1';
+        target.style.animation = 'none';
+
+        if (targetId === 'stage1') window.renderPuzzle();
+        if (targetId === 'stage-glitch') window.triggerSystemCrash();
+        if (targetId === 'stage-bridge') startBridgeSequence();
+        if (targetId === 'stage-matrix') startMatrixStage();
+    };
+
+    // =========================================
+    // Glitch / TV 崩潰特效 — 在霓虹板亮起後觸發過場
+    // =========================================
+    window.triggerSystemCrash = function() {
+        initAudio();
+        bgm.pause();
+
+        const stageGlitch = document.getElementById('stage-glitch');
+        const glitchScreen = document.getElementById('glitch-screen');
+        const tvLine = document.getElementById('tv-line');
+        const tvNoise = document.getElementById('tv-noise');
+        const finalScreen = document.getElementById('final-screen');
+        const neonBoard = document.getElementById('neon-board');
+
+        stageGlitch.style.display = 'flex';
+        glitchScreen.style.display = 'none';
+        finalScreen.style.display = 'none';
+        neonBoard.style.display = 'none';
+        tvLine.classList.remove('anim-tv-line');
+        tvNoise.classList.remove('anim-tv-noise');
+
+        setTimeout(() => { glitchScreen.style.display = 'flex'; }, 800);
+        setTimeout(() => {
+            glitchScreen.style.display = 'none';
+            tvLine.classList.add('anim-tv-line');
+            playBeep(0.5);
+        }, 4500);
+        setTimeout(() => {
+            tvNoise.classList.add('anim-tv-noise');
+            playStatic(2.0);
+        }, 5000);
+        setTimeout(() => {
+            finalScreen.style.display = 'flex';
+            neonBoard.style.display = 'none';
+        }, 7200);
+        // 霓虹板亮起
+        setTimeout(() => {
+            neonBoard.style.display = 'flex';
+        }, 7500);
+        // 霓虹板亮起後 3 秒啟動過場跑碼
+        setTimeout(() => {
+            stageGlitch.style.display = 'none';
+            startBridgeSequence();
+        }, 11000);
+    };
+
+    // =========================================
+    // 過場：跑碼揭示文字，完成後進入密碼關卡
+    // =========================================
+    function startBridgeSequence() {
+        const stageBridge = document.getElementById('stage-bridge');
+        stageBridge.style.display = 'flex';
+
+        // 啟動背景 Matrix 瀑布
+        const bridgeCanvas = document.getElementById('bridge-canvas');
+        initBridgeMatrix(bridgeCanvas);
+
+        const textBox = document.getElementById('bridge-text-box');
+        const line1El = document.getElementById('bline-1');
+        const line2El = document.getElementById('bline-2');
+        const lineHint = document.getElementById('bline-hint');
+
+        const line1 = '一件事的結束\n永遠是另一件事的開啟。';
+        const line2 = '黃磚路已然崩潰，\n新的道路又在哪裡？';
+        const hint  = '*回到學院曾經使用過的工具中尋找線索*';
+
+        // 淡入文字容器
+        setTimeout(() => {
+            textBox.classList.add('visible');
+
+            // 打出第一行
+            typeEffect(line1El, line1, 55, () => {
+                // 第一行完成後稍停，打出第二行
+                setTimeout(() => {
+                    typeEffect(line2El, line2, 55, () => {
+                        // 第二行完成後停頓 800ms 顯示提示行
+                        setTimeout(() => {
+                            typeEffect(lineHint, hint, 40, () => {
+                                // 全部打完後停頓 2.5 秒，進入密碼關卡
+                                setTimeout(() => {
+                                    stopBridgeMatrix();
+                                    stageBridge.style.display = 'none';
+                                    startMatrixStage();
+                                }, 2500);
+                            });
+                        }, 800);
+                    });
+                }, 600);
+            });
+        }, 400);
+    }
+
+    // 逐字打字效果（支援換行符）
+    function typeEffect(el, text, speed, onDone) {
+        let i = 0;
+        function next() {
+            if (i < text.length) {
+                const ch = text[i];
+                el.innerHTML += (ch === '\n') ? '<br>' : ch;
+                i++;
+                setTimeout(next, speed);
+            } else if (onDone) {
+                onDone();
+            }
+        }
+        next();
+    }
+
+    // 橋接過場的 Matrix 瀑布
+    let bridgeMatrixInterval = null;
+    function initBridgeMatrix(canvas) {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        const ctx = canvas.getContext('2d');
+        const fontSize = 14;
+        const cols = Math.floor(canvas.width / fontSize);
+        const drops = Array.from({ length: cols }, () => Math.random() * -50);
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%黃磚路崩潰新道路貍想'.split('');
+
+        bridgeMatrixInterval = setInterval(() => {
+            ctx.fillStyle = 'rgba(0,0,0,0.07)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px Courier New';
+            drops.forEach((y, i) => {
+                if (y * fontSize >= 0) {
+                    ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * fontSize, y * fontSize);
+                }
+                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }, 40);
+    }
+
+    function stopBridgeMatrix() {
+        if (bridgeMatrixInterval) {
+            clearInterval(bridgeMatrixInterval);
+            bridgeMatrixInterval = null;
+        }
+    }
+
+    // =========================================
+    // 第五關：密碼輸入（Matrix 瀑布 + 座標格）
+    // =========================================
+    let matrixStageInterval = null;
+
+    function startMatrixStage() {
+        const stageMatrix = document.getElementById('stage-matrix');
+        stageMatrix.style.display = 'block';
+
+        // 啟動 Matrix 瀑布
+        const canvas = document.getElementById('matrix-canvas');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        const ctx = canvas.getContext('2d');
+        const fontSize = 16;
+        let cols = Math.floor(canvas.width / fontSize);
+        let drops = Array.from({ length: cols }, () => Math.random() * -100);
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*黃磚路正在瓦解波玻貍登出西門町'.split('');
+
+        matrixStageInterval = setInterval(() => {
+            ctx.fillStyle = 'rgba(0,0,0,0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px Courier New';
+            drops.forEach((y, i) => {
+                if (y * fontSize >= 0) {
+                    ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * fontSize, y * fontSize);
+                }
+                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }, 40);
+
+        window.addEventListener('resize', () => {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            const newCols = Math.floor(canvas.width / fontSize);
+            while (drops.length < newCols) drops.push(0);
+        });
+
+        // 綁定座標輸入格
+        const inputs = document.querySelectorAll('#stage-matrix .coord-box');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/[^0-9]/g, '').slice(-1);
+                if (input.value !== '' && index < inputs.length - 1) inputs[index + 1].focus();
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value === '') {
+                    if (index > 0) { inputs[index - 1].focus(); inputs[index - 1].value = ''; }
+                } else if (e.key === 'Enter') {
+                    checkPwd(inputs);
+                }
+            });
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const digits = e.clipboardData.getData('text').replace(/\D/g, '');
+                let ci = index;
+                for (let i = 0; i < digits.length; i++) {
+                    if (ci < inputs.length) { inputs[ci].value = digits[i]; ci++; }
+                }
+                (ci < inputs.length ? inputs[ci] : inputs[inputs.length - 1]).focus();
+            });
+        });
+
+        document.getElementById('matrix-submit-btn').addEventListener('click', () => checkPwd(inputs));
+    }
+
+    function checkPwd(inputs) {
+        let pwd = '';
+        inputs.forEach(inp => pwd += inp.value);
+        const target = '2504221215080';
+
+        if (pwd === target) {
+            const ui = document.getElementById('matrix-ui');
+            ui.style.opacity = '0';
+            setTimeout(() => { ui.style.display = 'none'; }, 500);
+
+            // 停止瀑布並淡出
+            if (matrixStageInterval) { clearInterval(matrixStageInterval); matrixStageInterval = null; }
+            document.getElementById('matrix-canvas').style.opacity = '0';
+
+            setTimeout(() => {
+                const successScreen = document.getElementById('success-screen');
+                successScreen.style.display = 'flex';
+                setTimeout(() => {
+                    successScreen.style.opacity = '1';
+                    const vid = document.getElementById('finalVideo');
+                    vid.play().catch(e => console.log("需使用者授權播放", e));
+                }, 50);
+            }, 1000);
+        } else {
+            alert('❌ 座標錯誤：無法鎖定傳送目標 / Access Denied');
+            inputs.forEach(i => i.value = '');
+            inputs[0].focus();
+        }
+    }
+
+    // =========================================
+    // 前導劇情打字機
+    // =========================================
+    const storyText = "學院最後一次聚會中，流水席大廚波波貍煮完最後一道菜後，留下紙條：\n\n「未來不再有黃磚路了，\n但願大家走出自己的路……」\n\n接著消失在筵席上。\n\n汪汪在疑似染血的紙條底下發現一張未知圖形。";
+    const textContainer = document.getElementById("prologue-text");
+    const startBtn = document.getElementById("start-puzzle-btn");
+    const prologueContainer = document.getElementById("prologue");
+    let charIndex = 0;
+
+    function typeWriter() {
+        if (charIndex < storyText.length) {
+            let ch = storyText.charAt(charIndex);
+            textContainer.innerHTML += (ch === '\n') ? '<br>' : ch;
+            charIndex++;
+            prologueContainer.scrollTop = prologueContainer.scrollHeight;
+            setTimeout(typeWriter, 60);
+        } else {
+            setTimeout(() => {
+                startBtn.style.display = 'block';
+                startBtn.style.animation = 'fadeIn 1s forwards';
+                prologueContainer.scrollTop = prologueContainer.scrollHeight;
+            }, 500);
+        }
+    }
+
+    startBtn.addEventListener("click", () => {
+        document.getElementById('prologue').style.display = 'none';
+        document.getElementById('stage1').style.display = 'flex';
+        window.renderPuzzle();
+    });
+
+    // =========================================
+    // 第一關：華容道
+    // =========================================
+    const container = document.getElementById('puzzle-container');
+    const SIZE = 3;
+    let puzzleState = [0,1,2,3,4,5,6,7,8];
+    let pieces = [];
+    let isWon = false;
+
+    window.renderPuzzle = function() {
+        for (let i = 0; i < SIZE * SIZE; i++) {
+            let pos = puzzleState.indexOf(i);
+            let row = Math.floor(pos / SIZE), col = pos % SIZE;
+            let x = col * 100 + col * 2 + 2;
+            let y = row * 100 + row * 2 + 2;
+            if (pieces[i]) pieces[i].style.transform = `translate(${x}px, ${y}px)`;
+        }
+    };
+
+    function initPuzzle() {
+        for (let i = 0; i < SIZE * SIZE; i++) {
+            let piece = document.createElement('div');
+            piece.id = `piece-${i}`;
+            piece.classList.add('puzzle-piece');
+            let bgX = (i % SIZE) * 50, bgY = Math.floor(i / SIZE) * 50;
+            piece.style.backgroundPosition = `${bgX}% ${bgY}%`;
+            if (i !== 8) piece.addEventListener('click', () => handlePieceClick(i));
+            container.appendChild(piece);
+            pieces.push(piece);
+        }
+        shufflePuzzle(15);
+    }
+
+    function handlePieceClick(pieceIndex) {
+        if (isWon) return;
+        let cur = puzzleState.indexOf(pieceIndex);
+        let empty = puzzleState.indexOf(8);
+        let diff = Math.abs(cur - empty);
+        let adj = (diff === 1 && Math.floor(cur / SIZE) === Math.floor(empty / SIZE)) || diff === SIZE;
+        if (adj) {
+            puzzleState[empty] = pieceIndex;
+            puzzleState[cur] = 8;
+            window.renderPuzzle();
+            checkWinCondition();
+        }
+    }
+
+    function shufflePuzzle(moves) {
+        let lastMoved = -1;
+        for (let i = 0; i < moves; i++) {
+            let empty = puzzleState.indexOf(8);
+            let valid = [];
+            if (empty % SIZE > 0) valid.push(empty - 1);
+            if (empty % SIZE < SIZE - 1) valid.push(empty + 1);
+            if (empty >= SIZE) valid.push(empty - SIZE);
+            if (empty < SIZE * (SIZE - 1)) valid.push(empty + SIZE);
+            let filtered = valid.filter(p => puzzleState[p] !== lastMoved);
+            if (filtered.length > 0) valid = filtered;
+            let pick = valid[Math.floor(Math.random() * valid.length)];
+            let piece = puzzleState[pick];
+            lastMoved = piece;
+            puzzleState[empty] = piece;
+            puzzleState[pick] = 8;
+        }
+        window.renderPuzzle();
+    }
+
+    function checkWinCondition() {
+        if (puzzleState.every((v, i) => v === i)) {
+            isWon = true;
+            document.getElementById('piece-8').style.display = 'block';
+            container.classList.add('glow');
+            setTimeout(() => {
+                document.getElementById('stage1').style.display = 'none';
+                document.getElementById('stage2').style.display = 'flex';
+                document.getElementById('stage2').style.opacity = '1';
+            }, 1500);
+        }
+    }
+
+    initPuzzle();
+
+    // =========================================
+    // 第二關：LINE → 觸發崩潰特效
+    // =========================================
+    document.querySelectorAll('.glitch-trigger-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('stage2').style.display = 'none';
+            window.triggerSystemCrash();
+        });
+    });
+
+});
+</script>
+</body>
+</html>
