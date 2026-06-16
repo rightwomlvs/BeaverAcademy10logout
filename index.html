@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>學院最後的聚會</title>
     <style>
-        /* =========================================
-           基礎設定與手機版型限制
-           ========================================= */
         body {
             margin: 0; padding: 0; background-color: #222;
             font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "微軟正黑體", sans-serif;
@@ -19,9 +16,6 @@
             position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
 
-        /* =========================================
-           LINE 專屬防呆提示畫面
-           ========================================= */
         #line-warning {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.95); z-index: 10000;
@@ -43,9 +37,6 @@
             50% { transform: translate(10px, -10px); } 
         }
 
-        /* =========================================
-           遊戲序幕封面
-           ========================================= */
         #start-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #0b0b0b; z-index: 1000;
@@ -62,9 +53,6 @@
         }
         .btn-enter-game:active { background-color: #aa2222; transform: scale(0.95); }
 
-        /* =========================================
-           開發者維修站
-           ========================================= */
         #debug-menu {
             display: none;
             position: fixed; bottom: 15px; right: 15px; z-index: 9999;
@@ -76,9 +64,6 @@
         .debug-btn { background: #444; color: #fff; border: 1px solid #666; cursor: pointer; padding: 5px 10px; font-size: 12px; border-radius: 4px; transition: 0.2s; }
         .debug-btn:hover { background: #ffaa00; color: #000; border-color: #ffaa00; }
 
-        /* =========================================
-           前導劇情
-           ========================================= */
         #prologue {
             display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
             height: 100%; padding: 40px 20px 80px 20px; box-sizing: border-box; color: #eee; background-color: #111;
@@ -102,9 +87,6 @@
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* =========================================
-           第一關：華容道 (滑塊拼圖)
-           ========================================= */
         #stage1 { 
             display: none; flex-direction: column; justify-content: flex-start; align-items: center; 
             height: 100%; color: white; background-color: #1a1a1a; opacity: 0; animation: fadeIn 1s forwards; 
@@ -114,7 +96,6 @@
         
         #puzzle-container { position: relative; width: 306px; height: 306px; background-color: #444; border: 3px solid #333; border-radius: 4px; box-sizing: border-box; transition: box-shadow 0.5s; flex-shrink: 0;}
         
-        /* ⬇️ [已更新] 華容道圖片網址 */
         .puzzle-piece { 
             position: absolute; width: 98px; height: 98px; 
             background-image: url('https://drive.google.com/thumbnail?id=1g5RK3ZJvfOUWPw0Se3rdSpnnZe8mw1OJ&sz=w1000');
@@ -131,9 +112,6 @@
         .quote-text { color: #fff; font-weight: bold; }
         .action-hint { color: #888; font-size: 13px; margin-top: 15px; text-align: center; display: block;}
 
-        /* =========================================
-           第二關：LINE 介面
-           ========================================= */
         #stage2 { display: none; flex-direction: column; height: 100%; background-color: #849ebf; opacity: 0; animation: fadeIn 1s forwards;}
         .line-header { height: 55px; background-color: #353b48; color: white; display: flex; align-items: center; font-size: 17px; font-weight: bold; }
         .header-icon { flex: 1; text-align: center; cursor: pointer; }
@@ -163,9 +141,6 @@
         .action-btn:active { background-color: #e0e0e0; }
         .btn-icon { font-size: 36px; }
 
-        /* =========================================
-           Cyberpunk 崩潰特效區
-           ========================================= */
         #stage-glitch { display: none; height: 100%; background-color: black; color: white; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 10; overflow: hidden; }
         
         #glitch-screen { display: none; flex-direction: column; gap: 15px; z-index: 10; } 
@@ -232,9 +207,6 @@
         
         .cursor { display: none; }
 
-        /* =========================================
-           霓虹燈看板特效
-           ========================================= */
         .neon-board {
             position: relative;
             border: 4px solid #fff;
@@ -299,9 +271,6 @@
             }
         }
 
-        /* =========================================
-           第四關：跑碼過場 (Matrix 文字揭示)
-           ========================================= */
         #stage-bridge {
             display: none;
             position: absolute;
@@ -314,7 +283,6 @@
             overflow: hidden;
         }
 
-        /* 數位瀑布畫布（過場用） */
         #bridge-canvas {
             position: absolute;
             top: 0; left: 0;
@@ -322,7 +290,6 @@
             z-index: 1;
         }
 
-        /* 跑碼文字容器 */
         #bridge-text-box {
             position: relative;
             z-index: 2;
@@ -346,7 +313,6 @@
             opacity: 1;
         }
 
-        /* 每一行文字逐字打出 */
         .bridge-line {
             display: block;
             min-height: 1.9em;
@@ -359,9 +325,6 @@
             margin-top: 10px;
         }
 
-        /* =========================================
-           第五關：矩陣密碼輸入 (第二段程式碼)
-           ========================================= */
         #stage-matrix {
             display: none;
             position: absolute;
@@ -371,7 +334,6 @@
             overflow: hidden;
         }
 
-        /* 數位瀑布畫布（密碼關卡用） */
         #matrix-canvas {
             display: block;
             position: absolute;
@@ -380,7 +342,6 @@
             z-index: 1;
         }
 
-        /* 密碼輸入 UI */
         #matrix-ui {
             position: absolute;
             top: 50%; left: 50%;
@@ -397,6 +358,7 @@
             max-width: 440px;
             font-family: 'Courier New', Courier, monospace;
             color: #0F0;
+            transition: opacity 0.5s;
         }
 
         #matrix-ui h1 {
@@ -495,7 +457,6 @@
             100% { opacity: 1; transform: translate(0); }
         }
 
-        /* 成功登出畫面 */
         #success-screen {
             display: none;
             position: absolute;
@@ -691,8 +652,9 @@
         </div>
         <div id="success-screen">
             <div class="video-container">
-                <video id="finalVideo" playsinline preload="auto" controls>
-                    <source src="./Beaver10logout-to-Ximen-1.mp4" type="video/mp4">
+                <!-- ★ 修改點 1：加入 muted 屬性，這是手機自動播放的必要條件 -->
+                <video id="finalVideo" playsinline muted preload="auto">
+                    <source src="https://www.dropbox.com/scl/fi/9hom5co16tu10reyg515m/Beaver10logout-to-Ximen-1.mp4?rlkey=36u02vw40w34t7h4bd5qwzdpq&st=0p3nufgd&dl=1" type="video/mp4">
                 </video>
             </div>
             <div class="welcome-text">
@@ -760,11 +722,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btnStart.addEventListener('click', () => {
         initAudio();
         bgm.play().catch(e => console.log("播放被攔截:", e));
-
-        // ⬇️ [已更新] 趁玩家點擊入席時，提早解鎖最後影片的播放權限
-        const finalVid = document.getElementById('finalVideo');
-        finalVid.play().then(() => finalVid.pause()).catch(e => console.log("影片預先解鎖失敗"));
-
         startOverlay.style.opacity = '0';
         setTimeout(() => {
             startOverlay.style.display = 'none';
@@ -808,7 +765,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // =========================================
-    // Glitch / TV 崩潰特效 — 在霓虹板亮起後觸發過場
+    // Glitch / TV 崩潰特效
     // =========================================
     window.triggerSystemCrash = function() {
         initAudio();
@@ -842,11 +799,9 @@ document.addEventListener("DOMContentLoaded", () => {
             finalScreen.style.display = 'flex';
             neonBoard.style.display = 'none';
         }, 7200);
-        // 霓虹板亮起
         setTimeout(() => {
             neonBoard.style.display = 'flex';
         }, 7500);
-        // 霓虹板亮起後 3 秒啟動過場跑碼
         setTimeout(() => {
             stageGlitch.style.display = 'none';
             startBridgeSequence();
@@ -854,13 +809,12 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // =========================================
-    // 過場：跑碼揭示文字，完成後進入密碼關卡
+    // 過場：跑碼揭示文字
     // =========================================
     function startBridgeSequence() {
         const stageBridge = document.getElementById('stage-bridge');
         stageBridge.style.display = 'flex';
 
-        // 啟動背景 Matrix 瀑布
         const bridgeCanvas = document.getElementById('bridge-canvas');
         initBridgeMatrix(bridgeCanvas);
 
@@ -873,19 +827,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const line2 = '黃磚路已然崩潰，\n新的道路又在哪裡？';
         const hint  = '*回到學院Notion各頁面尋找線索*';
 
-        // 淡入文字容器
         setTimeout(() => {
             textBox.classList.add('visible');
-
-            // 打出第一行
             typeEffect(line1El, line1, 55, () => {
-                // 第一行完成後稍停，打出第二行
                 setTimeout(() => {
                     typeEffect(line2El, line2, 55, () => {
-                        // 第二行完成後停頓 800ms 顯示提示行
                         setTimeout(() => {
                             typeEffect(lineHint, hint, 40, () => {
-                                // 全部打完後停頓 2.5 秒，進入密碼關卡
                                 setTimeout(() => {
                                     stopBridgeMatrix();
                                     stageBridge.style.display = 'none';
@@ -899,7 +847,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 400);
     }
 
-    // 逐字打字效果（支援換行符）
     function typeEffect(el, text, speed, onDone) {
         let i = 0;
         function next() {
@@ -915,7 +862,6 @@ document.addEventListener("DOMContentLoaded", () => {
         next();
     }
 
-    // 橋接過場的 Matrix 瀑布
     let bridgeMatrixInterval = null;
     function initBridgeMatrix(canvas) {
         canvas.width = canvas.offsetWidth;
@@ -949,7 +895,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================================
-    // 第五關：密碼輸入（Matrix 瀑布 + 座標格）
+    // 第五關：密碼輸入
     // =========================================
     let matrixStageInterval = null;
 
@@ -957,7 +903,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const stageMatrix = document.getElementById('stage-matrix');
         stageMatrix.style.display = 'block';
 
-        // 啟動 Matrix 瀑布
         const canvas = document.getElementById('matrix-canvas');
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
@@ -988,7 +933,6 @@ document.addEventListener("DOMContentLoaded", () => {
             while (drops.length < newCols) drops.push(0);
         });
 
-        // 綁定座標輸入格
         const inputs = document.querySelectorAll('#stage-matrix .coord-box');
         inputs.forEach((input, index) => {
             input.addEventListener('input', () => {
@@ -1016,29 +960,61 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('matrix-submit-btn').addEventListener('click', () => checkPwd(inputs));
     }
 
+    // =========================================
+    // ★ 修改點 2：checkPwd — 先顯示畫面再播影片
+    // =========================================
     function checkPwd(inputs) {
         let pwd = '';
         inputs.forEach(inp => pwd += inp.value);
         const target = '2504221215080';
 
         if (pwd === target) {
+            const vid = document.getElementById('finalVideo');
             const ui = document.getElementById('matrix-ui');
-            ui.style.opacity = '0';
-            setTimeout(() => { ui.style.display = 'none'; }, 500);
+            const successScreen = document.getElementById('success-screen');
 
-            // 停止瀑布並淡出
+            // 淡出輸入 UI
+            ui.style.opacity = '0';
+
+            // 停止 Matrix 瀑布並淡出畫布
             if (matrixStageInterval) { clearInterval(matrixStageInterval); matrixStageInterval = null; }
-            document.getElementById('matrix-canvas').style.opacity = '0';
+            const matCanvas = document.getElementById('matrix-canvas');
+            matCanvas.style.transition = 'opacity 0.5s';
+            matCanvas.style.opacity = '0';
 
             setTimeout(() => {
-                const successScreen = document.getElementById('success-screen');
+                ui.style.display = 'none';
+
+                // ★ 關鍵：先讓 success-screen 變為可見（但透明），
+                //   確保影片元素在 DOM 中處於可見狀態，再呼叫 play()
                 successScreen.style.display = 'flex';
-                setTimeout(() => {
+                successScreen.style.opacity = '0';
+
+                // 強制 reflow，讓瀏覽器認知到元素已掛載到畫面上
+                void successScreen.offsetHeight;
+
+                // ★ 靜音播放（手機瀏覽器自動播放的必要條件）
+                vid.muted = true;
+                const playPromise = vid.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        // 播放成功後嘗試取消靜音（使用者已有互動，通常可以）
+                        vid.muted = false;
+                    }).catch(() => {
+                        // 取消靜音失敗則維持靜音繼續播，不影響畫面
+                        vid.muted = true;
+                    });
+                }
+
+                // 淡入成功畫面
+                requestAnimationFrame(() => {
+                    successScreen.style.transition = 'opacity 2s ease-in-out';
                     successScreen.style.opacity = '1';
-                    const vid = document.getElementById('finalVideo');
-                    vid.play().catch(e => console.log("需使用者授權播放", e));
-                }, 50);
-            }, 1000);
+                });
+
+            }, 500);
+
         } else {
             alert('❌ 座標錯誤：無法鎖定傳送目標 / Access Denied');
             inputs.forEach(i => i.value = '');
