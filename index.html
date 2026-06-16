@@ -114,6 +114,7 @@
         
         #puzzle-container { position: relative; width: 306px; height: 306px; background-color: #444; border: 3px solid #333; border-radius: 4px; box-sizing: border-box; transition: box-shadow 0.5s; flex-shrink: 0;}
         
+        /* ⬇️ [已更新] 華容道圖片網址 */
         .puzzle-piece { 
             position: absolute; width: 98px; height: 98px; 
             background-image: url('https://drive.google.com/thumbnail?id=1g5RK3ZJvfOUWPw0Se3rdSpnnZe8mw1OJ&sz=w1000');
@@ -690,7 +691,7 @@
         </div>
         <div id="success-screen">
             <div class="video-container">
-                <video id="finalVideo" playsinline preload="auto">
+                <video id="finalVideo" playsinline preload="auto" controls>
                     <source src="./Beaver10logout-to-Ximen-1.mp4" type="video/mp4">
                 </video>
             </div>
@@ -759,6 +760,11 @@ document.addEventListener("DOMContentLoaded", () => {
     btnStart.addEventListener('click', () => {
         initAudio();
         bgm.play().catch(e => console.log("播放被攔截:", e));
+
+        // ⬇️ [已更新] 趁玩家點擊入席時，提早解鎖最後影片的播放權限
+        const finalVid = document.getElementById('finalVideo');
+        finalVid.play().then(() => finalVid.pause()).catch(e => console.log("影片預先解鎖失敗"));
+
         startOverlay.style.opacity = '0';
         setTimeout(() => {
             startOverlay.style.display = 'none';
