@@ -116,8 +116,7 @@
         
         .puzzle-piece { 
             position: absolute; width: 98px; height: 98px; 
-            /* 這裡替換成了你指定的新圖片網址 */
-            background-image: url('https://drive.google.com/thumbnail?id=1g5RK3ZJvfOUWPw0Se3rdSpnnZe8mw1OJ&sz=w1000');
+            background-image: url('https://drive.google.com/thumbnail?id=10CxFJOmLZKQJl-B6GWuXFYkgjrkhHUTE&sz=w1000');
             background-size: 300px 300px; cursor: pointer; transition: transform 0.2s ease-in-out; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3); 
         }
         
@@ -560,7 +559,7 @@
     <button id="btn-close-line" class="btn-close-line">我已了解，繼續瀏覽</button>
 </div>
 
-<audio id="bgm-player" src="https://www.dropbox.com/scl/fi/fjq44ok4pvc4rnqhzn585/Ximending_Exit.mp3?rlkey=gh8ddyh0ll5rm2pxkb5yj2p8b&st=0le8j114&dl=1" loop></audio>
+<audio id="bgm-player" src="./Ximending_Exit.mp3" loop></audio>
 
 <div id="start-overlay">
     <div class="start-prompt">
@@ -692,7 +691,7 @@
         <div id="success-screen">
             <div class="video-container">
                 <video id="finalVideo" playsinline preload="auto">
-                    <source src="https://www.dropbox.com/scl/fi/9hom5co16tu10reyg515m/Beaver10logout-to-Ximen-1.mp4?rlkey=36u02vw40w34t7h4bd5qwzdpq&st=hgfghe04&raw=1" type="video/mp4">
+                    <source src="./Beaver10logout-to-Ximen-1.mp4" type="video/mp4">
                 </video>
             </div>
             <div class="welcome-text">
@@ -701,7 +700,9 @@
         </div>
     </div>
 
-</div><script>
+</div>
+
+<script>
 document.addEventListener("DOMContentLoaded", () => {
 
     // =========================================
