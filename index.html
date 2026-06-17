@@ -652,10 +652,10 @@
         </div>
         <div id="success-screen">
             <div class="video-container">
-    <video id="finalVideo" playsinline muted autoplay preload="auto" controls>
-        <source src="Ximen.mp4" type="video/mp4">
-    </video>
-</div>
+                <video id="finalVideo" playsinline muted preload="auto">
+                    <source src="https://github.com/rightwomlvs/BeaverAcademy10logout/releases/download/v1.0/Ximen.mp4.mp4" type="video/mp4">
+                </video>
+            </div>
             <div class="welcome-text">
                 世界就是一場盛大的遊戲－－<br>請前往西門町，尋找起始NPC，<br>開啟新的任務線。
             </div>
@@ -960,7 +960,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================================
-    // ★ 修改點 2：checkPwd — 先顯示畫面再播影片
+    // checkPwd — 先顯示畫面再播影片
     // =========================================
     function checkPwd(inputs) {
         let pwd = '';
@@ -984,15 +984,15 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 ui.style.display = 'none';
 
-                // ★ 關鍵：先讓 success-screen 變為可見（但透明），
-                //   確保影片元素在 DOM 中處於可見狀態，再呼叫 play()
+                // 先讓 success-screen 變為可見（但透明），
+                // 確保影片元素在 DOM 中處於可見狀態，再呼叫 play()
                 successScreen.style.display = 'flex';
                 successScreen.style.opacity = '0';
 
                 // 強制 reflow，讓瀏覽器認知到元素已掛載到畫面上
                 void successScreen.offsetHeight;
 
-                // ★ 靜音播放（手機瀏覽器自動播放的必要條件）
+                // 靜音播放（手機瀏覽器自動播放的必要條件）
                 vid.muted = true;
                 const playPromise = vid.play();
 
